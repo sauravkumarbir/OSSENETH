@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OSSEN — Portfolio</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --cyan: #a0e9ff;
+      --violet: #ce93d8;
+      --mint: #7ef0ff;
+      --ink: #08090c;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: white;
+      overflow-x: hidden;
+      background: var(--ink);
+      background-attachment: fixed;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -18%;
+      z-index: -3;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(86, 180, 255, 0.28), transparent 30%),
+        radial-gradient(circle at 82% 26%, rgba(196, 104, 255, 0.22), transparent 28%),
+        radial-gradient(circle at 48% 88%, rgba(70, 255, 210, 0.16), transparent 32%),
+        linear-gradient(120deg, rgba(160, 233, 255, 0.06), rgba(206, 147, 216, 0.07), rgba(126, 240, 255, 0.05));
+      background-size: 160% 160%;
+      animation: bgDrift 22s ease-in-out infinite;
+    }
+
+    .lights { position: fixed; inset: 0; z-index: -2; pointer-events: none; overflow: hidden; }
+    .orb {
+      position: absolute; border-radius: 50%; filter: blur(40px); opacity: 0.55;
+      mix-blend-mode: screen; animation: floatOrb 16s ease-in-out infinite;
+    }
+    .orb.a { width: 280px; height: 280px; left: 8%; top: 18%; background: radial-gradient(circle, rgba(160,233,255,0.55), transparent 68%); }
+    .orb.b { width: 340px; height: 340px; right: 6%; top: 28%; background: radial-gradient(circle, rgba(206,147,216,0.5), transparent 68%); animation-delay: -5s; }
+    .orb.c { width: 240px; height: 240px; left: 40%; bottom: 8%; background: radial-gradient(circle, rgba(126,240,255,0.42), transparent 70%); animation-delay: -9s; }
+    .beam {
+      position: absolute; width: 2px; height: 140%; top: -20%;
+      background: linear-gradient(to bottom, transparent, rgba(160,233,255,0.35), transparent);
+      filter: blur(1px); animation: beamSweep 14s linear infinite;
+    }
+    .beam:nth-child(4) { left: 22%; animation-delay: -3s; }
+    .beam:nth-child(5) { left: 61%; animation-delay: -8s; opacity: 0.6; }
+
+    .cursor-light {
+      position: fixed; width: 280px; height: 280px; border-radius: 50%;
+      pointer-events: none; z-index: 1; transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(160,233,255,0.14), rgba(206,147,216,0.06) 40%, transparent 68%);
+      mix-blend-mode: screen;
+    }
+
+    @keyframes bgDrift {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); background-position: 0% 40%; }
+      50% { transform: translate3d(-2.5%, 1.5%, 0) scale(1.05); background-position: 100% 60%; }
+    }
+    @keyframes floatOrb {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(24px, -30px, 0) scale(1.12); }
+    }
+    @keyframes beamSweep {
+      0% { transform: translateX(-40px) rotate(12deg); opacity: 0.2; }
+      50% { opacity: 0.7; }
+      100% { transform: translateX(80px) rotate(12deg); opacity: 0.2; }
+    }
+    @keyframes ringRun { to { transform: rotate(360deg); } }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes titleFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    @keyframes btnBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    @keyframes rise { to { opacity: 1; transform: none; } }
+    @keyframes shimmer {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(28px) scale(0.96); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .video-wrap {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      overflow: hidden;
+      background: #08090c;
+    }
+    .video-bg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      min-width: 100%;
+      min-height: 100%;
+      transform: translate(-50%, -50%);
+      object-fit: cover;
+      object-position: center center;
+    }
+    .overlay {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background:
+        linear-gradient(to bottom, rgba(0,0,0,0.22), rgba(0,0,0,0.5)),
+        radial-gradient(circle at 20% 20%, rgba(126, 211, 255, 0.1), transparent 35%),
+        radial-gradient(circle at 80% 65%, rgba(210, 130, 255, 0.09), transparent 34%);
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; width: 100%;
+      padding: 16px 28px;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px;
+      z-index: 100; background: transparent;
+      overflow: visible;
+    }
+
+    .brand { display: inline-flex; align-items: center; gap: 10px; color: white; text-decoration: none; min-width: 0; }
+
+    .logo-ring {
+      width: 46px; height: 46px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      position: relative; isolation: isolate; flex: 0 0 auto;
+      background: linear-gradient(160deg, rgba(255,255,255,0.28), rgba(160,233,255,0.12) 45%, rgba(206,147,216,0.16));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.28), 0 0 18px rgba(160,233,255,0.12);
+    }
+    .logo-ring::before, .social-icon::before, .oss-btn::before, .ring-title::before {
+      content: ""; position: absolute; inset: -3px; padding: 2px; z-index: -1;
+      background: conic-gradient(from 0deg, transparent 0 28%, #fff 40%, #a0e9ff 52%, #ce93d8 64%, #7ef0ff 76%, transparent 88% 100%);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude;
+      animation: ringRun 2.4s linear infinite;
+      filter: drop-shadow(0 0 6px rgba(160,233,255,0.7));
+    }
+    .logo-ring::before, .social-icon::before { border-radius: 50%; }
+    .brand-mark {
+      width: 28px; height: 28px; object-fit: contain; border-radius: 50%; position: relative; z-index: 1;
+      filter: grayscale(1) brightness(1.2) drop-shadow(0 0 10px rgba(160,233,255,0.18));
+    }
+    .logo {
+      font-size: 1.35rem; font-weight: 700; letter-spacing: 2px;
+      background: linear-gradient(90deg, #fff, #a0e9ff, #ce93d8, #7ef0ff, #fff);
+      background-size: 300% 100%; -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; animation: gradientShift 6s ease infinite;
+      filter: drop-shadow(0 0 10px rgba(160, 233, 255, 0.22));
+    }
+
+    .nav-links { display: flex; gap: 10px; align-items: center; flex: 0 0 auto; }
+
+    .social-icon {
+      width: 44px; height: 44px; border-radius: 50%; flex: 0 0 auto;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; isolation: isolate; color: white; text-decoration: none;
+      background: linear-gradient(160deg, rgba(255,255,255,0.28), rgba(160,233,255,0.12) 45%, rgba(206,147,216,0.16));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.28), 0 8px 24px rgba(0,0,0,0.28), 0 0 18px rgba(160,233,255,0.12);
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+    }
+    .social-icon::after {
+      content: ""; position: absolute; inset: 2px; border-radius: 50%;
+      background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.35), transparent 42%);
+      pointer-events: none;
+    }
+    .social-icon svg, .social-icon img { width: 18px; height: 18px; fill: currentColor; position: relative; z-index: 1; display: block; }
+    .social-icon:hover { transform: translateY(-6px) scale(1.08); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5), 0 14px 30px rgba(160,233,255,0.28); }
+    .hero-socials .social-icon { width: 54px; height: 54px; animation: btnBounce 3s ease-in-out infinite; }
+    .hero-socials .social-icon svg, .hero-socials .social-icon img { width: 22px; height: 22px; }
+    .hero-socials .social-icon:nth-child(1) { animation-delay: 0s; }
+    .hero-socials .social-icon:nth-child(2) { animation-delay: 0.35s; }
+    .hero-socials .social-icon:nth-child(3) { animation-delay: 0.7s; }
+    .footer-socials .social-icon { width: 48px; height: 48px; }
+    .footer-socials .social-icon svg, .footer-socials .social-icon img { width: 20px; height: 20px; }
+
+    .cta-wrap { display: flex; justify-content: center; width: 100%; margin-top: 28px; }
+    .oss-btn {
+      position: relative; isolation: isolate;
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 240px; padding: 16px 34px; border-radius: 999px;
+      color: #fff; text-decoration: none; font-weight: 750;
+      letter-spacing: 0.16em; text-transform: uppercase; font-size: 0.82rem;
+      background: linear-gradient(160deg, rgba(255,255,255,0.28), rgba(160,233,255,0.14) 48%, rgba(206,147,216,0.18));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.28), 0 10px 28px rgba(160,233,255,0.16);
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+    }
+    .oss-btn::before { border-radius: inherit; }
+    .oss-btn span {
+      position: relative; z-index: 1;
+      background: linear-gradient(90deg, #fff, #a0e9ff, #ce93d8, #7ef0ff, #fff);
+      background-size: 220% 100%; -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; animation: shimmer 4s linear infinite;
+    }
+    .oss-btn:hover { transform: translateY(-6px) scale(1.04); box-shadow: 0 16px 34px rgba(160,233,255,0.28); }
+
+    .hero {
+      min-height: 100vh; min-height: 100dvh;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      text-align: center; padding: 108px 20px 64px;
+    }
+    .hero h1 {
+      font-size: clamp(1.7rem, 8vw, 3.6rem); font-weight: 800;
+      letter-spacing: 0; margin-bottom: 14px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.1em;
+      flex-wrap: wrap; max-width: 100%;
+      animation: titleFloat 4s ease-in-out infinite;
+      filter: drop-shadow(0 0 18px rgba(160,233,255,0.35));
+    }
+    .name {
+      display: inline-flex; align-items: baseline; gap: 0;
+      letter-spacing: clamp(1px, 0.4vw, 4px);
+      background: linear-gradient(90deg, #fff, #a0e9ff, #ce93d8, #fff);
+      background-size: 300% 100%; -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; animation: gradientShift 6s ease infinite;
+    }
+    .hero h1 .dot {
+      display: inline; width: auto; margin: 0; padding: 0; letter-spacing: 0;
+      -webkit-text-fill-color: #a0e9ff; animation: blink 1s step-end infinite;
+    }
+    .eth-mark {
+      width: 0.72em; height: 0.72em; display: inline-flex; color: #a0e9ff;
+      -webkit-text-fill-color: #a0e9ff; filter: drop-shadow(0 0 10px rgba(79, 195, 247, 0.55));
+    }
+    .eth-mark svg { width: 100%; height: 100%; display: block; }
+    .hero p {
+      font-size: clamp(0.95rem, 3.4vw, 1.15rem); opacity: 0.92; max-width: 560px;
+      line-height: 1.55; margin-bottom: 28px; text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+      padding: 0 8px;
+    }
+    .hero-socials { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    section { padding: 80px 24px; max-width: 1200px; margin: 0 auto; position: relative; background: transparent; }
+
+    .ring-title {
+      display: inline-flex; align-items: center; position: relative; isolation: isolate;
+      padding: 12px 18px; border-radius: 999px; margin-bottom: 22px; max-width: 100%;
+      background: linear-gradient(160deg, rgba(255,255,255,0.14), rgba(160,233,255,0.06));
+      letter-spacing: 1px; font-size: clamp(1.15rem, 4.4vw, 1.9rem); font-weight: 700;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5); text-align: center;
+    }
+    .ring-title::before { border-radius: inherit; animation-duration: 3.2s; }
+
+    .section-sub { opacity: 0.78; margin-bottom: 28px; font-size: 0.95rem; }
+    .section-sub a { color: #a0e9ff; }
+
+    .about-grid { display: grid; grid-template-columns: 1.4fr 0.8fr; gap: 22px; align-items: start; }
+    .about-panel { position: relative; border-radius: 20px; isolation: isolate; }
+    .about-panel::before {
+      content: ""; position: absolute; inset: -2px; border-radius: 22px; padding: 1.5px;
+      background: conic-gradient(from 0deg, transparent 10%, #a0e9ff, #ce93d8, #7ef0ff, transparent 70%);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude;
+      animation: ringRun 8s linear infinite; z-index: -1;
+    }
+    .about-text {
+      font-size: 1.02rem; line-height: 1.75; padding: 20px; border-radius: 20px;
+      background: rgba(8,9,12,0.28); border: 1px solid rgba(255,255,255,0.12);
+      animation: rise 0.8s ease both;
+    }
+    .about-text span {
+      background: linear-gradient(90deg, #fff, #a0e9ff, #ce93d8, #7ef0ff, #fff);
+      background-size: 220% 100%; -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; animation: shimmer 7s linear infinite;
+    }
+
+    .facts { display: grid; gap: 12px; }
+    .fact {
+      padding: 16px 18px; border-radius: 16px; position: relative; isolation: isolate;
+      background: transparent; border: 1px solid rgba(255,255,255,0.1);
+      animation: rise 0.7s ease both; box-shadow: inset 0 0 24px rgba(160,233,255,0.05);
+    }
+    .fact:nth-child(2) { animation-delay: 0.08s; }
+    .fact:nth-child(3) { animation-delay: 0.16s; }
+    .fact:nth-child(4) { animation-delay: 0.24s; }
+    .fact::before {
+      content: ""; position: absolute; inset: -2px; border-radius: 18px; padding: 1.5px;
+      background: conic-gradient(from 0deg, transparent 20%, #fff, #a0e9ff, #ce93d8, transparent 78%);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude;
+      animation: ringRun 4.5s linear infinite; z-index: -1; opacity: 0.85;
+    }
+    .fact span { display: block; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.55; margin-bottom: 4px; }
+    .fact strong {
+      font-size: 1.02rem; font-weight: 650;
+      background: linear-gradient(90deg, #fff, #a0e9ff, #fff);
+      background-size: 200% 100%; -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; animation: shimmer 5s linear infinite;
+    }
+
+    .nft-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); gap: 16px; }
+    .nft-card {
+      background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
+      overflow: hidden; text-decoration: none; color: white; display: block; position: relative; isolation: isolate;
+      transition: transform 0.35s ease, box-shadow 0.35s ease; animation: cardIn 0.7s ease both;
+    }
+    .nft-card::before {
+      content: ""; position: absolute; inset: 0; border-radius: 16px; padding: 1.5px;
+      background: conic-gradient(from 0deg, transparent 15%, rgba(255,255,255,0.85), #a0e9ff, #ce93d8, #7ef0ff, transparent 72%);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude;
+      animation: ringRun 6s linear infinite; pointer-events: none; z-index: 2;
+    }
+    .nft-card:hover { transform: translateY(-8px); box-shadow: 0 16px 40px rgba(0,0,0,0.35), 0 0 30px rgba(160,233,255,0.16); }
+    .nft-img { width: 100%; aspect-ratio: 1; object-fit: cover; object-position: center; background: transparent; display: block; image-rendering: pixelated; }
+    .nft-info { padding: 14px; background: transparent; }
+    .nft-info h3 {
+      font-size: 1rem; margin-bottom: 4px; font-weight: 600;
+      background: linear-gradient(90deg, #fff, #a0e9ff, #ce93d8);
+      background-size: 200% 100%; -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; animation: shimmer 6s linear infinite;
+    }
+    .nft-meta { display: grid; gap: 5px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .nft-meta-row { display: flex; justify-content: space-between; gap: 12px; font-size: 0.78rem; }
+    .nft-meta-row span:first-child { opacity: 0.48; text-transform: uppercase; letter-spacing: 0.08em; }
+    .nft-meta-row span:last-child { color: rgba(255,255,255,0.88); text-align: right; }
+
+    footer { border-top: 1px solid rgba(255,255,255,0.1); padding: 48px 20px 56px; background: rgba(0,0,0,0.42); }
+    .footer-inner {
+      width: min(1200px, 100%); margin: 0 auto;
+      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 28px;
+    }
+    .footer-brand { display: flex; align-items: center; gap: 12px; font-size: 1.1rem; }
+    .footer-left {
+      font-weight: 700; letter-spacing: 2px;
+      background: linear-gradient(90deg, #fff, #a0e9ff, #ce93d8, #7ef0ff, #fff);
+      background-size: 300% 100%; -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; animation: gradientShift 6s ease infinite;
+    }
+    .footer-socials { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .footer-note { text-align: right; font-size: 0.95rem; line-height: 1.5; color: rgba(255,255,255,0.62); }
+    .footer-note a { color: #a0e9ff; text-decoration: none; }
+    .footer-note a:hover { text-decoration: underline; }
+
+    @media (max-width: 860px) {
+      .about-grid { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; justify-items: center; gap: 20px; }
+      .footer-note, .footer-brand { text-align: center; justify-content: center; }
+    }
+    @media (max-width: 768px) {
+      nav { padding: 10px 12px; }
+      .logo { font-size: 1rem; letter-spacing: 1px; }
+      .logo-ring { width: 36px; height: 36px; }
+      .brand-mark { width: 22px; height: 22px; }
+      .nav-links { gap: 6px; }
+      .nav-links .social-icon { width: 36px; height: 36px; }
+      .nav-links .social-icon svg, .nav-links .social-icon img { width: 16px; height: 16px; }
+      .hero { padding: 92px 14px 48px; }
+      .hero-socials { gap: 12px; }
+      .hero-socials .social-icon { width: 48px; height: 48px; }
+      section { padding: 56px 14px; }
+      .oss-btn { min-width: 0; width: min(100%, 280px); padding: 14px 18px; letter-spacing: 0.1em; }
+      .cursor-light { display: none; }
+    }
+    @media (max-width: 380px) {
+      .logo { display: none; }
+      .nav-links .social-icon { width: 34px; height: 34px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="lights" aria-hidden="true">
+    <span class="orb a"></span>
+    <span class="orb b"></span>
+    <span class="orb c"></span>
+    <span class="beam"></span>
+    <span class="beam"></span>
+  </div>
+  <div class="cursor-light" id="cursorLight" aria-hidden="true"></div>
+
+  <div class="video-wrap">
+    <video id="bgVideo" class="video-bg" autoplay muted loop playsinline preload="auto">
+      <source src="https://video.twimg.com/amplify_video/2107546598360420352/vid/avc1/1280x720/kSi7U-p72Xz7m6Se.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="overlay"></div>
+
+  <nav>
+    <a href="#" class="brand" aria-label="OSSEN home">
+      <span class="logo-ring">
+        <img class="brand-mark" src="https://unavatar.io/x/osseneth" alt="OSSEN skull logo" onerror="this.style.display='none';" />
+      </span>
+      <span class="logo">OSSEN</span>
+    </a>
+    <div class="nav-links">
+      <a href="https://x.com/osseneth" target="_blank" rel="noopener" class="social-icon" title="@osseneth" aria-label="X">
+        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://t.me/ossenteth" target="_blank" rel="noopener" class="social-icon" title="Telegram" aria-label="Telegram">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M21.9 3.2 2.9 10.5c-1.3.5-1.3 1.2-.2 1.5l4.9 1.5 1.9 6c.2.6.1.8.8.8.5 0 .7-.2 1-.5l2.4-2.3 5 3.7c.9.5 1.5.2 1.7-.8l3.2-15.1c.3-1.2-.5-1.8-1.7-1.3zM8.4 13.1l10.6-6.7c.5-.3.9-.1.5.2l-8.6 7.8-.3 3.5-1.2-4.8-1-.3z"/></svg>
+      </a>
+      <a href="https://opensea.io/ossen.eth" target="_blank" rel="noopener" class="social-icon" title="OpenSea" aria-label="OpenSea">
+        <img src="https://static.seadn.io/logos/Logomark-White.svg" alt="" />
+      </a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>
+      <span class="eth-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32"><path fill="currentColor" d="M16.2 1.2 6.4 16.4 16.2 21.4 26 16.4 16.2 1.2z"/><path fill="currentColor" opacity="0.72" d="M16.2 23.3 6.4 18.4 16.2 30.8 26 18.4 16.2 23.3z"/></svg>
+      </span>
+      <span class="name">OSSEN<span class="dot">.</span>ETH</span>
+    </h1>
+    <p>OSSEN Anonymous collector who buys with conviction and stands next to artists, not brands.</p>
+    <div class="hero-socials">
+      <a href="https://x.com/osseneth" target="_blank" rel="noopener" class="social-icon" title="@osseneth" aria-label="X">
+        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://t.me/ossenteth" target="_blank" rel="noopener" class="social-icon" title="Telegram" aria-label="Telegram">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M21.9 3.2 2.9 10.5c-1.3.5-1.3 1.2-.2 1.5l4.9 1.5 1.9 6c.2.6.1.8.8.8.5 0 .7-.2 1-.5l2.4-2.3 5 3.7c.9.5 1.5.2 1.7-.8l3.2-15.1c.3-1.2-.5-1.8-1.7-1.3zM8.4 13.1l10.6-6.7c.5-.3.9-.1.5.2l-8.6 7.8-.3 3.5-1.2-4.8-1-.3z"/></svg>
+      </a>
+      <a href="https://opensea.io/ossen.eth" target="_blank" rel="noopener" class="social-icon" title="OpenSea" aria-label="OpenSea">
+        <img src="https://static.seadn.io/logos/Logomark-White.svg" alt="" />
+      </a>
+    </div>
+    <div class="cta-wrap">
+      <a class="oss-btn" href="https://opensea.io/ossen.eth" target="_blank" rel="noopener">
+        <span>OSSEN Collections</span>
+      </a>
+    </div>
+  </section>
+
+  <section id="about">
+    <h2 class="ring-title">Who Is OSSEN ?</h2>
+    <div class="about-grid">
+      <div class="about-panel">
+        <p class="about-text">
+          <span>Ossen (ossen.eth) is a 27-year-old collector living in Qatar. In interview he keeps the skull as the public face and talks about the bag more than the biography: high-conviction digital art, especially Argonauts, and a rule that artists make the culture while collectors only decide whether to stand next to it. He has put it plainly — a collector without conviction is just a holder, and burning an ape is a vote, not a stunt for its own sake. The wallet surfaced in September 2026, funded with about 50 ETH, and went straight for rare Argonauts, including a clean 0-trait piece that became the profile and Argonaut #8393 for 40 ETH. He bought BAYC #5085 for 6.649 ETH and sent it to the burn address soon after. Since then the public style has stayed the same: sweeps, artist trades of one Argonaut for one artwork, commissions, and permanent on-chain moves. The name stays behind the skull. The activity does not.</span>
+        </p>
+      </div>
+      <div class="facts">
+        <div class="fact"><span>Base</span><strong>Qatar</strong></div>
+        <div class="fact"><span>Age</span><strong>27</strong></div>
+        <div class="fact"><span>Known for</span><strong>Argonauts · the BAYC burn</strong></div>
+        <div class="fact"><span>Line</span><strong>“Artists do. We stand next to it.”</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="argonauts">
+    <h2 class="ring-title">Argonauts</h2>
+    <p class="section-sub">
+      Core holdings from the Ossen vault ·
+      <a href="https://opensea.io/ossen.eth?collectionSlugs=argonauts" target="_blank" rel="noopener">View full bag on OpenSea →</a>
+    </p>
+    <div class="cta-wrap" style="margin: 0 0 28px;">
+      <a class="oss-btn" href="https://opensea.io/ossen.eth?collectionSlugs=argonauts" target="_blank" rel="noopener">
+        <span>OSSEN Collections</span>
+      </a>
+    </div>
+    <div class="nft-grid">
+      <a class="nft-card" href="https://opensea.io/item/ethereum/0x387c41b0b2f1128de44db1bcf8baad085f26392c/1258" target="_blank" rel="noopener">
+        <img class="nft-img" src="https://raw2.seadn.io/ethereum/0x387c41b0b2f1128de44db1bcf8baad085f26392c/009e9366864d1dfea01c0a57ef3cad/e1009e9366864d1dfea01c0a57ef3cad.svg" alt="Argonaut #1258" />
+        <div class="nft-info"><h3>Argonaut #1258</h3><div class="nft-meta"><div class="nft-meta-row"><span>Collection</span><span>Argonauts</span></div><div class="nft-meta-row"><span>Owned by</span><span>ossen.eth</span></div><div class="nft-meta-row"><span>Item</span><span>#1258</span></div></div></div>
+      </a>
+      <a class="nft-card" href="https://opensea.io/ossen.eth?collectionSlugs=argonauts" target="_blank" rel="noopener">
+        <img class="nft-img" src="https://pbs.twimg.com/media/HTqc27DXcAAEekq.png" alt="Argonaut" />
+        <div class="nft-info"><h3>Argonaut</h3><div class="nft-meta"><div class="nft-meta-row"><span>Collection</span><span>Argonauts</span></div><div class="nft-meta-row"><span>Owned by</span><span>ossen.eth</span></div><div class="nft-meta-row"><span>Item</span><span>Vault</span></div></div></div>
+      </a>
+      <a class="nft-card" href="https://opensea.io/ossen.eth?collectionSlugs=argonauts" target="_blank" rel="noopener">
+        <img class="nft-img" src="https://pbs.twimg.com/media/HTqc269XQAACNXg.png" alt="Argonaut" />
+        <div class="nft-info"><h3>Argonaut</h3><div class="nft-meta"><div class="nft-meta-row"><span>Collection</span><span>Argonauts</span></div><div class="nft-meta-row"><span>Owned by</span><span>ossen.eth</span></div><div class="nft-meta-row"><span>Item</span><span>Vault</span></div></div></div>
+      </a>
+      <a class="nft-card" href="https://opensea.io/ossen.eth?collectionSlugs=argonauts" target="_blank" rel="noopener">
+        <img class="nft-img" src="https://pbs.twimg.com/media/HTqc266W4AAZ32D.png" alt="Argonaut" />
+        <div class="nft-info"><h3>Argonaut</h3><div class="nft-meta"><div class="nft-meta-row"><span>Collection</span><span>Argonauts</span></div><div class="nft-meta-row"><span>Owned by</span><span>ossen.eth</span></div><div class="nft-meta-row"><span>Item</span><span>Vault</span></div></div></div>
+      </a>
+      <a class="nft-card" href="https://opensea.io/ossen.eth?collectionSlugs=argonauts" target="_blank" rel="noopener">
+        <img class="nft-img" src="https://pbs.twimg.com/media/HTqc269WMAAul4L.png" alt="Argonaut" />
+        <div class="nft-info"><h3>Argonaut</h3><div class="nft-meta"><div class="nft-meta-row"><span>Collection</span><span>Argonauts</span></div><div class="nft-meta-row"><span>Owned by</span><span>ossen.eth</span></div><div class="nft-meta-row"><span>Item</span><span>Vault</span></div></div></div>
+      </a>
+      <a class="nft-card" href="https://opensea.io/item/ethereum/0x387c41b0b2f1128de44db1bcf8baad085f26392c/8227" target="_blank" rel="noopener">
+        <img class="nft-img" src="https://pbs.twimg.com/media/HSh9KinWwAAyh7m.png" alt="Argonaut #8227" />
+        <div class="nft-info"><h3>Argonaut #8227</h3><div class="nft-meta"><div class="nft-meta-row"><span>Collection</span><span>Argonauts</span></div><div class="nft-meta-row"><span>Owned by</span><span>ossen.eth</span></div><div class="nft-meta-row"><span>Item</span><span>#8227</span></div></div></div>
+      </a>
+      <a class="nft-card" href="https://argonauts.musefacktory.com/argonaut/3615" target="_blank" rel="noopener">
+        <img class="nft-img" src="https://pbs.twimg.com/media/HSRhxhwWEAAmL1U.png" alt="Argonaut #3615" />
+        <div class="nft-info"><h3>Argonaut #3615</h3><div class="nft-meta"><div class="nft-meta-row"><span>Collection</span><span>Argonauts</span></div><div class="nft-meta-row"><span>Owned by</span><span>ossen.eth</span></div><div class="nft-meta-row"><span>Item</span><span>#3615</span></div></div></div>
+      </a>
+      <a class="nft-card" href="https://opensea.io/ossen.eth?collectionSlugs=argonauts" target="_blank" rel="noopener">
+        <img class="nft-img" src="https://raw2.seadn.io/ethereum/0x387c41b0b2f1128de44db1bcf8baad085f26392c/009e9366864d1dfea01c0a57ef3cad/e1009e9366864d1dfea01c0a57ef3cad.svg" alt="Argonaut" />
+        <div class="nft-info"><h3>Argonaut</h3><div class="nft-meta"><div class="nft-meta-row"><span>Collection</span><span>Argonauts</span></div><div class="nft-meta-row"><span>Owned by</span><span>ossen.eth</span></div><div class="nft-meta-row"><span>Item</span><span>OpenSea</span></div></div></div>
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo-ring">
+          <img class="brand-mark" src="https://unavatar.io/x/osseneth" alt="OSSEN skull logo" onerror="this.style.display='none';" />
+        </span>
+        <div class="footer-left">OSSEN</div>
+      </div>
+      <div class="footer-socials" aria-label="Social links">
+        <a href="https://x.com/osseneth" target="_blank" rel="noopener" class="social-icon" title="X — @osseneth" aria-label="X"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+        <a href="https://t.me/ossenteth" target="_blank" rel="noopener" class="social-icon" title="Telegram" aria-label="Telegram"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21.9 3.2 2.9 10.5c-1.3.5-1.3 1.2-.2 1.5l4.9 1.5 1.9 6c.2.6.1.8.8.8.5 0 .7-.2 1-.5l2.4-2.3 5 3.7c.9.5 1.5.2 1.7-.8l3.2-15.1c.3-1.2-.5-1.8-1.7-1.3zM8.4 13.1l10.6-6.7c.5-.3.9-.1.5.2l-8.6 7.8-.3 3.5-1.2-4.8-1-.3z"/></svg></a>
+        <a href="https://opensea.io/ossen.eth" target="_blank" rel="noopener" class="social-icon" title="OpenSea" aria-label="OpenSea"><img src="https://static.seadn.io/logos/Logomark-White.svg" alt="" /></a>
+      </div>
+      <div class="footer-note">
+        Fan-made website for <strong>ossen.eth</strong> by
+        <a href="https://x.com/obue" target="_blank" rel="noopener">@obue</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const video = document.getElementById('bgVideo');
+    function tryPlay() {
+      video.muted = true;
+      video.playsInline = true;
+      const p = video.play();
+      if (p) p.catch(() => setTimeout(() => video.play().catch(() => {}), 500));
+    }
+    function unmuteOnInteraction() {
+      video.muted = false;
+      video.play().catch(() => {});
+      ['click','touchstart','keydown'].forEach(e => document.removeEventListener(e, unmuteOnInteraction));
+    }
+    ['click','touchstart','keydown'].forEach(e => document.addEventListener(e, unmuteOnInteraction));
+    if (document.readyState === 'complete') tryPlay();
+    else window.addEventListener('load', tryPlay);
+    video.addEventListener('error', () => { document.body.style.background = '#0a0a0a'; });
+
+    const light = document.getElementById('cursorLight');
+    window.addEventListener('pointermove', (e) => {
+      light.style.left = e.clientX + 'px';
+      light.style.top = e.clientY + 'px';
+    });
+  </script>
+</body>
+</html>
